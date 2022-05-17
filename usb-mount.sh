@@ -38,7 +38,7 @@ do_mount()
         OPTS+=",users,gid=100,umask=000,shortname=mixed,utf8=1,flush"
     fi
 
-    if ! /bin/mount -o "${OPTS} ${DEVICE} ${MOUNT_POINT}"; then
+    if ! /bin/mount -o "${OPTS}" "${DEVICE}" "${MOUNT_POINT}"; then
         # Error during mount process: cleanup mountpoint
         /bin/rmdir "${MOUNT_POINT}"
         exit 1
