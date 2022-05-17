@@ -1,18 +1,18 @@
 # usb-automount
 
-# docker dir
+# Docker usb source dir
 
-please kinldy put in 
+please put in 
 
 `usb/docker` folder
 
-# success log
+# Success log
 
 `usb/copy.success` is success log.
 
 if usb had this log. script not copy again from this usb.
 
-# error and log
+# Error and log
 
 - detail log `usb/docker.log` 
 - docker content dir is missing `usb/docker-dir-not-found`
