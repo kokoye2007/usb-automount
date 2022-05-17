@@ -1,0 +1,161 @@
+#cloud-config
+
+autoinstall:
+  version: 1
+
+  refresh-installer:
+    update: yes
+  
+  ssh: 
+    install-server: yes
+    authorized-keys: 
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAWS8Rxx0WhwC9pO+WGER2e9Hvr+gR5teWAFPfKBvltj liontamer-prod
+    allow-pw: no
+  
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+
+  storage:
+    config:
+    - grub_device: true
+      id: disk-sda
+      ptable: gpt
+      match: {}
+      type: disk
+      wipe: superblock-recursive
+    - device: disk-sda
+      flag: bios_grub
+      id: partition-0
+      number: 1
+      size: 1048576
+      type: partition
+    - device: disk-sda
+      id: partition-1
+      number: 2
+      size: 10G
+      type: partition
+      wipe: superblock
+    - fstype: ext4
+      id: format-0
+      type: format
+      volume: partition-1
+    - device: format-0
+      id: mount-0
+      path: /
+      type: mount
+    - device: disk-sda
+      id: partition-2
+      number: 3
+      size: 1G
+      type: partition
+      wipe: superblock
+    - fstype: ext4
+      id: format-1
+      type: format
+      volume: partition-2
+    - device: format-1
+      id: mount-1
+      path: /tmp
+      type: mount
+    - device: disk-sda
+      id: partition-3
+      number: 4
+      size: 5G
+      type: partition
+      wipe: superblock
+    - fstype: ext4
+      id: format-2
+      type: format
+      volume: partition-3
+    - device: format-2
+      id: mount-2
+      path: /var/lib/docker
+      type: mount
+    - device: disk-sda
+      id: partition-4
+      number: 5
+      size: -1
+      type: partition
+      wipe: superblock
+    - fstype: ext4
+      id: format-3
+      type: format
+      volume: partition-4
+    - device: format-3
+      id: mount-3
+      path: /data
+      type: mount
+  apt:
+    sources:
+      docker.list:
+        source: deb [arch=amd64] https://download.docker.com/linux/ubuntu $RELEASE stable
+        keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88  
+  packages:
+    - docker-ce
+    - docker-ce-cli
+    - ansible
+    - make
+  package_update: true
+  package_upgrade: true
+  user-data: # Commands here run during first boot (cannot be interactive)
+    hostname: liontamer-controller
+    system_info:
+      default_user:
+      name: liontamer
+      gecos: Liontamer
+      passwd: "$1$xvBU76kF$r.wishKU7Z6B7pYcBucqP1"
+      lock_passwd: false
+      sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+      ssh_authorized_keys:
+         - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC86G73H0wdEDJS+RmUMuQpmZ38xq6MJWSOQbbQxUF7t+DW2nYrInpSBQgp3FyTo4FY+bb0TbLf832/cqmwha0yzOyi9bTNq0bHzxZ7ZNsgbsT5moQHiG+MUbnRHzgg9kw/iil6Gbo0m2/LsNTqnwmLwgWC6tJDo2LCww0sAPEksEA8Z2TzvDCPqLmXMbE9w6FqhDLDVcAT9hxBN7aOKDLaXAz7ld+AgAn8NoW9SY9iqc0c9W1YzgYpreHlCnqgVwnrBGqaR9tN5AWXd5rqR2tPXCB57vugHxmgnoDhL9ycW7b5HrzWZq5PzNTsQSF7bUGdb69jxGOvCVwoghN8Xuel kokoye2007@kokoye2007
+      ssh_import_id:
+         - gh:cantoni
+         - gh:kokoye2007
+    users:
+      - default
+      - name: liontamer
+        passwd: "$1$xvBU76kF$r.wishKU7Z6B7pYcBucqP1"
+        lock_passwd: false
+        shell: /bin/bash
+        groups: [sshd,sudo]
+        uid: "500"
+        ssh_authorized_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC86G73H0wdEDJS+RmUMuQpmZ38xq6MJWSOQbbQxUF7t+DW2nYrInpSBQgp3FyTo4FY+bb0TbLf832/cqmwha0yzOyi9bTNq0bHzxZ7ZNsgbsT5moQHiG+MUbnRHzgg9kw/iil6Gbo0m2/LsNTqnwmLwgWC6tJDo2LCww0sAPEksEA8Z2TzvDCPqLmXMbE9w6FqhDLDVcAT9hxBN7aOKDLaXAz7ld+AgAn8NoW9SY9iqc0c9W1YzgYpreHlCnqgVwnrBGqaR9tN5AWXd5rqR2tPXCB57vugHxmgnoDhL9ycW7b5HrzWZq5PzNTsQSF7bUGdb69jxGOvCVwoghN8Xuel kokoye2007@kokoye2007
+        ssh_import_id:
+          - gh:cantoni
+          - gh:kokoye2007
+           # - lp:liontamer
+           # - gh:liontamer
+    runcmd:
+      - |
+        curl -L https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+        df -h | grep -w "/data\|/tmp\|/var/lib/docker\|/"
+        git clone https://github.com/kokoye2007/usb-automount /tmp/usbdocker
+        cd /tmp/usbdocker
+        make install
+      #- [echo, hello]
+      #- [apt-get, update]
+      #- [apt-get, dist-upgrade, --yes]
+      #- [apt, autoremove, --yes]
+      # - |
+      #   #!/usr/bin/env bash
+      #   echo ''
+      #   echo '***************************************'
+      #   echo ' To complete install setup please run, '
+      #   echo ' sudo /usr/local/bin/install-setup.sh'
+      #   echo '***************************************'
+      #   echo ''
+final_message: |
+      "The system is finally up, after $UPTIME seconds
+
+      $(df -h | grep -w '/data\|/tmp\|/var/lib/docker\|/')
+
+      $(docker --version)
+
+      $(docker-compose --version)
+
+      $(ansible --version)
+
+      "
