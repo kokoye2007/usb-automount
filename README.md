@@ -29,3 +29,15 @@ SUCCESS=${MOUNT_POINT}/copy.success
 #Log for Error Tracker
 LOG=${MOUNT_POINT}/docker.log
 ```
+
+# Make
+
+- Install
+```
+sudo make install
+```
+
+- Remove
+```
+sudo make remove
+```
